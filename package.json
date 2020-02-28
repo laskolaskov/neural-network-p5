@@ -1,0 +1,24 @@
+{
+  "name": "neural-network-p5",
+  "version": "1.0.0",
+  "description": "Neural Network Library (using P5 for visualisation)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "watchify index.js -v -o build/client.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laskolaskov/neural-network-p5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laskolaskov/neural-network-p5/issues"
+  },
+  "homepage": "https://github.com/laskolaskov/neural-network-p5#readme",
+  "dependencies": {
+    "p5": "^0.10.2"
+  }
+}
