@@ -23,6 +23,7 @@ const xorTrainDataSet = [
 ]
 
 const staticTest = () => {
+    console.log('Solving XOR')
     console.log('Static test started ...')
 
     const brain = new NN(2, 2, 1)
@@ -54,25 +55,73 @@ const staticTest = () => {
 }
 
 //run static test function
-staticTest()
+//staticTest()
 
-let sketch = (p) => {
+//sketch to visualize XOR solving
+const sketchXOR = (p) => {
 
     let brain
 
     p.setup = () => {
         p.createCanvas(400, 400)
 
-        brain = new NN(2, 2, 1, p)
+        brain = new NN(2, 5, 1)
 
-        //console.log('brain :: ', brain)
+        console.log('brain :: ', brain)
 
     }
 
     p.draw = () => {
         p.background(0)
+
+        //train on each draw step
+        for (let i = 0; i < 1000; i++) {
+            const data = p.random(xorTrainDataSet)
+            brain.train(data.input, data.target)
+        }
+
+        //set up grid
+        let resolution = 10
+        let cols = p.width / resolution
+        let rows = p.height / resolution
+
+        //get brain outputs for each grid point
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                const x1 = i / cols
+                const x2 = j / rows
+                const inputs = [x1, x2]
+                const y = brain.feedForward(inputs)
+                //draw
+                p.noStroke()
+                p.fill(y * 255)
+                p.rect(i * resolution, j * resolution, resolution, resolution)
+            }
+        }
+
+        //test prediction - should approach '0' over time
+        console.log(brain.feedForward([1, 1]))
     }
 }
 
-//create the sketch
-const P5 = new p5(sketch);
+const sketchColorPredictor = (p) => {
+
+    let brain
+
+    p.setup = () => {
+        p.createCanvas(400, 400)
+
+        brain = new NN(2, 5, 1)
+
+        console.log('brain :: ', brain)
+
+    }
+
+    p.draw = () => {
+        p.background(255, 0, 0)        
+    }
+}
+
+//create sketch
+const P5 = new p5(sketchXOR)
+//const P5 = new p5(sketchColorPredictor)

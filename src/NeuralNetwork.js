@@ -5,9 +5,9 @@ const sigmoid = x => 1 / (1 + Math.exp(-x))
 const dsigmoid = x => sigmoid(x) * (1 - sigmoid(x))
 
 class NeuralNetwork {
-    constructor(numI, numH, numO, p) {
+    constructor(numI, numH, numO) {
         this.lr = 0.1
-        this.p = p
+
         this.inputNodes = numI
         this.hiddenNodes = numH
         this.outputNodes = numO

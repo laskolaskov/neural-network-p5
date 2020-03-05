@@ -1,6 +1,5 @@
 class Matrix {
-    constructor(rows, cols, p) {
-        this.p = p
+    constructor(rows, cols) {
         this.rows = rows
         this.cols = cols
         this.data = []
