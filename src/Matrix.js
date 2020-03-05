@@ -126,12 +126,20 @@ class Matrix {
     }
 
     static transpose(m) {
+        if (!(m instanceof Matrix)) {
+            console.error('transpose (static) :: argument must be of type Matrix')
+            return
+        }
         const result = new Matrix(m.cols, m.rows)
         result.loop((el, i, j) => m.data[j][i])
         return result
     }
 
     static fromArray(arr) {
+        if (!(arr instanceof Array)) {
+            console.error('fromArray (static) :: argument must be of type Array')
+            return
+        }
         const m = new Matrix(arr.length, 1)
         arr.forEach((el, i) => m.data[i][0] = el)
         return m
