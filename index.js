@@ -85,7 +85,7 @@ const sketchXOR = (p) => {
         let cols = p.width / resolution
         let rows = p.height / resolution
 
-        //get brain outputs for each grid point
+        //get brain outputs for each grid cell
         for (let i = 0; i < cols; i++) {
             for (let j = 0; j < rows; j++) {
                 const x1 = i / cols
@@ -104,24 +104,90 @@ const sketchXOR = (p) => {
     }
 }
 
+//scetch for solving color prediction
 const sketchColorPredictor = (p) => {
 
-    let brain
+    let brain, r, g, b
+    let which = 'B'
+
+    const pickColor = () => {
+        r = p.random(255)
+        g = p.random(255)
+        b = p.random(255)
+
+        p.redraw()
+    }
+
+    const colorPredictor = () => {
+        //create normalized input from the color values
+        const input = [r / 255, g / 255, b / 255]
+
+        //get the output
+        const output = brain.feedForward(input)
+
+        if (output[0] > output[1]) {
+            which = 'B'
+        } else {
+            which = 'W'
+        }
+    }
 
     p.setup = () => {
-        p.createCanvas(400, 400)
+        p.createCanvas(600, 300)
+        pickColor()
 
-        brain = new NN(2, 5, 1)
-
-        console.log('brain :: ', brain)
-
+        brain = new NN(3, 3, 2)
     }
 
     p.draw = () => {
-        p.background(255, 0, 0)        
+        p.background(r, g, b)
+
+        p.textSize(p.width / 10)
+        p.noStroke()
+        p.fill(0)
+        p.textAlign(p.CENTER, p.CENTER)
+        p.text('BLACK', p.width / 4, p.height / 2)
+        p.fill(255)
+        p.text('WHITE', 3 * p.width / 4, p.height / 2)
+        p.stroke(0)
+        p.line(p.width / 2, 0, p.width / 2, p.height)
+
+        colorPredictor()
+
+        if (which == 'B') {
+            p.fill(0)
+            p.circle(p.width / 4, p.height / 3, p.width / 20)
+        } else {
+            p.fill(255)
+            p.circle(3 * p.width / 4, p.height / 3, p.width / 20)
+        }
+
+        p.noLoop()
+    }
+
+    p.mousePressed = () => {
+        //check click position
+        if (p.mouseX > p.width && p.mouseY > p.height) {
+            console.log('Click out of bounds, no training')
+            return
+        }
+
+        //create normalized input from the color values
+        const input = [r / 255, g / 255, b / 255]
+
+        //train based on click position
+        if (p.mouseX < p.width / 2) {
+            brain.train(input, [1, 0])
+            console.log('Training for BLACK')
+        } else {
+            brain.train(input, [0, 1])
+            console.log('Training for WHITE')
+        }
+        //pick new color for the next redraw
+        pickColor()
     }
 }
 
 //create sketch
-const P5 = new p5(sketchXOR)
-//const P5 = new p5(sketchColorPredictor)
+//const P5 = new p5(sketchXOR)
+const P5 = new p5(sketchColorPredictor)
