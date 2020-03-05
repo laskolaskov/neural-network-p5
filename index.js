@@ -9,32 +9,18 @@ let sketch = (p) => {
     p.setup = () => {
         p.createCanvas(400, 400)
 
-        brain = new NN(3, 3, 1, p)
+        brain = new NN(2, 2, 2, p)
 
         console.log('brain :: ', brain)
 
-        matrix = new M(2, 3)
-        //m1 = new M(3, 4)
-        matrix.randomize()
-        //m1.randomize()
+        const inputArr = [1, 0]
+        const targetArr = [1, 0]
 
-        matrix.print()
+        //const output = brain.feedForward(inputArr)
 
-        const trans = M.transpose(matrix)
-        const sec = M.transpose(trans)
+        const output = brain.train(inputArr, targetArr)
 
-        sec.print()
-
-        //matrix.scale(5)
-        //matrix.add(1.5)
-        //matrix.multiply(m1)
-
-        //const prod = M.product(matrix, m1)
-        //const prod1 = M.product(m1, matrix)
-
-        
-        //console.table(prod.matrix)
-        //console.table(prod1.matrix)
+        output.print()
     }
 
     p.draw = () => {

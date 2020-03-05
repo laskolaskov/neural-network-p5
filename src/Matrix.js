@@ -15,7 +15,7 @@ class Matrix {
     }
 
     randomize() {
-        this.loop(el => Math.floor(Math.random() * 10))
+        this.loop(el => Math.random() * 2 - 1) //[-1, 1] //Math.floor(Math.random() * 10)
     }
 
     scale(n) {
@@ -64,9 +64,15 @@ class Matrix {
         console.table(this.data)
     }
 
+    toArray() {
+        const arr = []
+        this.loop(el => arr.push(el))
+        return arr
+    }
+
     static product(a, b) {
-        if (a.cols != b.rows || a.rows != b.cols) {
-            console.error('product :: matrices dimensions does not match :: dim(A) != dim(TB) !')
+        if (a.cols !== b.rows) {
+            console.error('Columns of A must match the rows of B !')
             return
         }
         //initialize result matrix
@@ -85,10 +91,50 @@ class Matrix {
         return result
     }
 
+    static subtract(a, b) {
+        if (!(a instanceof Matrix) || !(b instanceof Matrix)) {
+            console.error('subtract (static) :: arguments must be of type Matrix')
+            return
+        }
+        if (a.rows != b.rows || a.cols != b.cols) {
+            console.error('subtract (static) :: arguments must be Matrix with same dimensions !')
+            return
+        }
+
+        const result = new Matrix(a.rows, a.cols)
+
+        result.loop((el, i, j) => a.data[i][j] - b.data[i][j])
+
+        return result
+    }
+
+    static addMatrix(a, b) {
+        if (!(a instanceof Matrix) || !(b instanceof Matrix)) {
+            console.error('addMatrix (static) :: arguments must be of type Matrix')
+            return
+        }
+        if (a.rows != b.rows || a.cols != b.cols) {
+            console.error('addMatrix (static) :: arguments must be Matrix with same dimensions !')
+            return
+        }
+
+        const result = new Matrix(a.rows, a.cols)
+
+        result.loop((el, i, j) => a.data[i][j] + b.data[i][j])
+
+        return result
+    }
+
     static transpose(m) {
         const result = new Matrix(m.cols, m.rows)
         result.loop((el, i, j) => m.data[j][i])
         return result
+    }
+
+    static fromArray(arr) {
+        const m = new Matrix(arr.length, 1)
+        arr.forEach((el, i) => m.data[i][0] = el)
+        return m
     }
 }
 
