@@ -135,8 +135,8 @@ class Matrix {
     }
 
     static fromArray(arr) {
-        if (!(arr instanceof Array)) {
-            console.error('fromArray (static) :: argument must be of type Array')
+        if (!(arr instanceof Array || arr instanceof Object)) {
+            console.error('fromArray (static) :: argument must be of type Array or Object')
             return
         }
         const m = new Matrix(arr.length, 1)

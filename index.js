@@ -57,6 +57,192 @@ const staticTest = () => {
 //run static test function
 //staticTest()
 
+const doodleclasifier = (p) => {
+    //based on Google's Quick Draw dataset
+    const len = 784
+
+    let brain
+
+    let totalTrained = 0
+
+    let trainBtn, testBtn, guessBtn, clearBtn
+
+    const CAT = 0
+    const RAINBOW = 1
+    const TRAIN = 2
+
+    const cats = {
+        data: null,
+        training: [],
+        testing: []
+    }
+    const rainbows = {
+        data: null,
+        training: [],
+        testing: []
+    }
+    const trains = {
+        data: null,
+        training: [],
+        testing: []
+    }
+
+    const prepareData = (category, label) => {
+        const totalData = 1000
+        const treshold = p.floor(0.8 * totalData)
+
+        for (let i = 0; i < totalData; i++) {
+            const offset = i * len
+            if (i < treshold) {
+                category.training[i] = category.data.bytes.subarray(offset, offset + len)
+                category.training[i].label = label
+            } else {
+                category.testing[i - treshold] = category.data.bytes.subarray(offset, offset + len)
+                category.testing[i - treshold].label = label
+            }
+        }
+    }
+
+    const trainEpoch = () => {
+        //train
+        const trainingData = p.shuffle(cats.training.concat(trains.training, rainbows.training))
+        for (let i = 0; i < trainingData.length; i++) {
+            const input = []
+            const target = Array(3).fill(0)
+            target[trainingData[i].label] = 1
+            //normalize input
+            for (let j = 0; j < trainingData[i].length; j++) {
+                input[j] = trainingData[i][j] / 255.0
+            }
+            //train
+            brain.train(input, target)
+        }
+    }
+
+    const train = (epochs = 1) => {
+        console.log(`Starting training for ${epochs} epoch(s), please wait ...`)
+        for (let i = 0; i < epochs; i++) {
+            trainEpoch()
+            console.log(`Training epoch ${i + 1} done`)
+            testAll()
+        }
+        console.log(`Trained for ${epochs} epoch(s)`)
+    }
+
+    const testAll = () => {
+        console.log(`Running testing data, please wait ...`)
+        const testingData = cats.testing.concat(trains.testing, rainbows.testing)
+        let correct = 0
+        for (let i = 0; i < testingData.length; i++) {
+            const input = []
+            //normalize input
+            for (let j = 0; j < testingData[i].length; j++) {
+                input[j] = testingData[i][j] / 255.0
+            }
+            //train
+            let guess = brain.feedForward(input)
+            if (guess.indexOf(p.max(guess)) == testingData[i].label) {
+                correct++
+            }
+        }
+        console.log(`Testing complete`)
+        console.log(`Prediction success rate :: ${correct / testingData.length * 100} %`)
+    }
+
+    const checkDataLoad = () => {
+        //show some doodles to test data loading
+        let total = 100
+        for (let n = 0; n < total; n++) {
+            let img = p.createImage(28, 28)
+            img.loadPixels()
+            let offset = n * len
+            for (let i = 0; i < len; i++) {
+                let val = 255 - cats.data.bytes[i + offset]
+                img.pixels[i * 4 + 0] = val
+                img.pixels[i * 4 + 1] = val
+                img.pixels[i * 4 + 2] = val
+                img.pixels[i * 4 + 3] = val
+            }
+            img.updatePixels()
+            let x = (n % 10) * 28
+            let y = p.floor(n / 10) * 28
+            p.image(img, x, y)
+        }
+    }
+
+    p.preload = () => {
+        cats.data = p.loadBytes('data/cats1000.bin')
+        trains.data = p.loadBytes('data/trains1000.bin')
+        rainbows.data = p.loadBytes('data/rainbows1000.bin')
+    }
+
+    p.setup = () => {
+        p.createCanvas(280, 280)
+        p.background(255)
+
+        trainBtn = p.createButton('Train')
+        testBtn = p.createButton('Test')
+        guessBtn = p.createButton('Guess')
+        clearBtn = p.createButton('Clear')
+
+        brain = new NN(len, 64, 3)
+
+        trainBtn.mousePressed(() => {
+            train()
+            totalTrained++
+            console.log(`Trained for total ${totalTrained} epoch(s)`)
+        })
+
+        testBtn.mousePressed(() => {
+            testAll()
+        })
+
+        clearBtn.mousePressed(() => {
+            p.clear()
+            p.background(255)
+        })
+
+        guessBtn.mousePressed(() => {
+            const input = []
+            const img = p.get()
+            img.resize(28, 28)
+            img.loadPixels()
+            for (let i = 0; i < len; i++) {
+                const bright = img.pixels[i * 4]
+                input[i] = (255 - bright) / 255.0
+            }
+            
+            const guess = brain.feedForward(input)
+            const m = p.max(guess)
+            const classification = guess.indexOf(m)
+
+            console.log(guess)
+
+            if(classification === CAT) {
+                console.log(`Guess : ${m} value for CAT`)
+            } else if (classification === TRAIN) {
+                console.log(`Guess : ${m} value for TRAIN`)
+            } else if (classification === RAINBOW) {
+                console.log(`Guess : ${m} value for RAINBOW`)
+            }
+
+            
+        })
+
+        prepareData(cats, CAT)
+        prepareData(trains, TRAIN)
+        prepareData(rainbows, RAINBOW)
+    }
+
+    p.draw = () => {
+        p.strokeWeight(8)
+        p.stroke(0)
+        if (p.mouseIsPressed) {
+            p.line(p.pmouseX, p.pmouseY, p.mouseX, p.mouseY)
+        }
+    }
+}
+
 //sketch to visualize XOR solving
 const sketchXOR = (p) => {
 
@@ -190,4 +376,5 @@ const sketchColorPredictor = (p) => {
 
 //create sketch
 //const P5 = new p5(sketchXOR)
-const P5 = new p5(sketchColorPredictor)
+//const P5 = new p5(sketchColorPredictor)
+const P5 = new p5(doodleclasifier)
